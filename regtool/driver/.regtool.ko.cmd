@@ -1,1 +1,0 @@
-cmd_/pub/liaods/github/liaods/modules/regtool/driver/regtool.ko := arm-linux-gnueabihf-ld -EL -r  -T /home/ubuntu/sunxi-bsp/linux-sunxi/scripts/module-common.lds --build-id  -o /pub/liaods/github/liaods/modules/regtool/driver/regtool.ko /pub/liaods/github/liaods/modules/regtool/driver/regtool.o /pub/liaods/github/liaods/modules/regtool/driver/regtool.mod.o

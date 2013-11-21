@@ -1,1 +1,0 @@
-cmd_/pub/liaods/github/liaods/modules/regtool/driver/built-in.o :=  rm -f /pub/liaods/github/liaods/modules/regtool/driver/built-in.o; arm-linux-gnueabihf-ar rcsD /pub/liaods/github/liaods/modules/regtool/driver/built-in.o
