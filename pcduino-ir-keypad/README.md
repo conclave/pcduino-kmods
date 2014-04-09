@@ -1,6 +1,6 @@
 NOTE:
 
-This is a sample gpio-based ir-keypad driver for pcDuino.
+This is gpio-based ir-keypad driver sample for pcDuino boards(V1/V2/V3).
 It was tested for my ir-remote controller only.
 The driver is for NEC IR-controller only now, other devices you could change the code by yourself.
 You have to changed something for your device to make it work:
@@ -30,4 +30,7 @@ $ make M=`pwd` -C /usr/src/linux-3.4.29+
 $ sudo rmmod ir-keypad
 $ sudo insmod ir-keypad.ko pin=X
 
+
+Note:
+  you can also cross-compile the driver with build.sh (update KDIR path for your machine).
 

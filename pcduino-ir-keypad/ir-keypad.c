@@ -52,7 +52,11 @@ MODULE_PARM_DESC(pin, "gpio number(0-4, 7-17, default is 8) where ir-receiver co
 #define REG_RD(fmt...)  __raw_readl(fmt)
 #define REG_WR(fmt...)  __raw_writel(fmt)
 
+#ifdef CONFIG_ARCH_SUN7I
+#define PIO_IRQ  60
+#else
 #define PIO_IRQ  28
+#endif
 #define PIO_BASE_VA 0xf1c20800
 #define INTC_BASE_VA 0xf1c20400
 
