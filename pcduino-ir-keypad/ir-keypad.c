@@ -29,6 +29,7 @@
 #include "remote.h"
 
 #define DEBUG_MSG(...)       printk("[ir-keypad]: "__VA_ARGS__);
+
 struct ir_keypad {
     struct input_dev        *input_dev;
     struct platform_device  *pdev;
@@ -44,7 +45,7 @@ struct ir_gpio {
 };
 
 static int pin = 8;
-module_param(pin,int,0644);
+module_param(pin, int, 0644);
 MODULE_PARM_DESC(pin, "gpio number(0-4, 7-17, default is 8) where ir-receiver connected");
 
 #define PORT_H ('H' - 'A' + 1)
@@ -93,20 +94,18 @@ static struct ir_gpio gpio_key;
 static unsigned short rawcode_to_keycode(unsigned long code)
 {
     int i;
-    for ( i = 0; i < MAX_KEYS; ++i)
-    {
-        if ( raw_codes[i] == code )
+    for (i = 0; i < MAX_KEYS; ++i) {
+        if (raw_codes[i] == code)
             return keys[i];
     }
     return -1;
 }
 
-static unsigned char * rawcode_to_str(unsigned long code)
+static unsigned char *rawcode_to_str(unsigned long code)
 {
     int i;
-    for ( i = 0; i < MAX_KEYS; ++i)
-    {
-        if ( raw_codes[i] == code )
+    for (i = 0; i < MAX_KEYS; ++i) {
+        if (raw_codes[i] == code)
             return key_str[i];
     }
     return "unknown";
@@ -116,45 +115,39 @@ static unsigned char * rawcode_to_str(unsigned long code)
 static void pio_fun_cfg(int port, int num)
 {
     u32 reg;
-    if ( port == PORT_H )
-    {
+    if (port == PORT_H) {
         reg = REG_RD(PIO_BASE_VA + PIO_PH_CFGn(num));
-        reg &= ~(0x7 << (num%8)*4);
-        reg |= 0x6 << ((num%8)*4);
+        reg &= ~(0x7 << (num % 8) * 4);
+        reg |= 0x6 << ((num % 8) * 4);
         REG_WR(reg, PIO_BASE_VA + PIO_PH_CFGn(num));
-    }
-    else
-    {
+    } else {
         reg = REG_RD(PIO_BASE_VA + PIO_PI_CFGn(num));
-        reg &= ~(0x7 << (num%8)*4);
-        reg |= 0x6 << ((num%8)*4);
+        reg &= ~(0x7 << (num % 8) * 4);
+        reg |= 0x6 << ((num % 8) * 4);
         REG_WR(reg, PIO_BASE_VA + PIO_PI_CFGn(num));
-    }   
+    }
 }
 
 static void pio_int_cfg(int irq, pio_int_mode_t mode)
 {
-    u32 reg =   REG_RD(PIO_BASE_VA + PIO_INT_CFGn(irq));
-    reg &= ~(0xf << (irq%8)*4);
-    reg |= mode << ((irq%8)*4);
+    u32 reg = REG_RD(PIO_BASE_VA + PIO_INT_CFGn(irq));
+    reg &= ~(0xf << (irq % 8) * 4);
+    reg |= mode << ((irq % 8) * 4);
     REG_WR(reg, PIO_BASE_VA + PIO_INT_CFGn(irq));
 }
 
 static void pio_pull_cfg(int port, int num, pio_pull_t val)
 {
     u32 reg;
-    if ( port == PORT_H )
-    {
+    if (port == PORT_H) {
         reg = REG_RD(PIO_BASE_VA + PIO_PH_PULLn(num));
-        reg &= ~(0x3 << (num%15)*2);
-        reg |= val << ((num%15)*2);
+        reg &= ~(0x3 << (num % 15) * 2);
+        reg |= val << ((num % 15) * 2);
         REG_WR(reg, PIO_BASE_VA + PIO_PH_PULLn(num));
-    }
-    else
-    {
+    } else {
         reg = REG_RD(PIO_BASE_VA + PIO_PI_PULLn(num));
-        reg &= ~(0x3 << (num%15)*2);
-        reg |= val << ((num%15)*2);
+        reg &= ~(0x3 << (num % 15) * 2);
+        reg |= val << ((num % 15) * 2);
         REG_WR(reg, PIO_BASE_VA + PIO_PI_PULLn(num));
     }
 
@@ -163,29 +156,26 @@ static void pio_pull_cfg(int port, int num, pio_pull_t val)
 /* map gpio pin on pcDuino to CPU pio */
 static int init_ir_pin(u32 *port, u32 *num)
 {
-    switch(pin)
-    {
-
-        case 0: *port = PORT_I; *num = 19; break;
-        case 1: *port = PORT_I; *num = 18; break;
-        case 2: *port = PORT_H; *num = 7; break;
-        case 3: *port = PORT_H; *num = 6; break;
-        case 4: *port = PORT_H; *num = 8; break;
-        
-        case 7: *port = PORT_H; *num = 9; break;
-        case 8: *port = PORT_H; *num = 10; break;
-        case 9: *port = PORT_H; *num = 5; break;
-        case 10: *port = PORT_I; *num = 10; break;
-        case 11: *port = PORT_I; *num = 12; break;
-        case 12: *port = PORT_I; *num = 13; break;
-        case 13: *port = PORT_I; *num = 11; break;
-        case 14: *port = PORT_H; *num = 11; break;
-        case 15: *port = PORT_H; *num = 12; break;
-        case 16: *port = PORT_H; *num = 13; break;
-        case 17: *port = PORT_H; *num = 14; break;
-        default:
-            printk("invalid pin number, should be in 0-4 or 7-17\n");
-            return -EINVAL;
+    switch (pin) {
+    case 0: *port = PORT_I; *num = 19; break;
+    case 1: *port = PORT_I; *num = 18; break;
+    case 2: *port = PORT_H; *num = 7; break;
+    case 3: *port = PORT_H; *num = 6; break;
+    case 4: *port = PORT_H; *num = 8; break;
+    case 7: *port = PORT_H; *num = 9; break;
+    case 8: *port = PORT_H; *num = 10; break;
+    case 9: *port = PORT_H; *num = 5; break;
+    case 10: *port = PORT_I; *num = 10; break;
+    case 11: *port = PORT_I; *num = 12; break;
+    case 12: *port = PORT_I; *num = 13; break;
+    case 13: *port = PORT_I; *num = 11; break;
+    case 14: *port = PORT_H; *num = 11; break;
+    case 15: *port = PORT_H; *num = 12; break;
+    case 16: *port = PORT_H; *num = 13; break;
+    case 17: *port = PORT_H; *num = 14; break;
+    default:
+        printk("invalid pin number, should be in 0-4 or 7-17\n");
+        return -EINVAL;
     }
     return 0;
 }
@@ -197,19 +187,17 @@ static s64 delta; /* ns */
 
 static int pushbit(unchar *data, ulong code)
 {
-    if (code == IR_VAL_ZERO )
-        *data &= ~(0x1<<s_bits);
+    if (code == IR_VAL_ZERO)
+        *data &= ~(0x1 << s_bits);
     else if (code == IR_VAL_ONE)
-        *data |= (0x1<<s_bits);
-    else
-    {
+        *data |= (0x1 << s_bits);
+    else {
         s_bits = 0;
         return 1;
     }
 
     s_bits++;
-    if (s_bits >= 8)
-    {
+    if (s_bits >= 8) {
         s_bits = 0;
         s_next++;
     }
@@ -220,16 +208,16 @@ static int pushbit(unchar *data, ulong code)
 
 static int nec_dec(void)
 {
-    ktime_t         now;    
+    ktime_t         now;
     static ktime_t  last_event_time;
     u32 code = 0;
     int len;
     u32 data = 0;
-    
+
     now = ktime_get();
     delta = ktime_to_us(ktime_sub(now, last_event_time));
     //DEBUG_MSG("delta=%lld us\n", delta);
-    
+
     last_event_time = now;
 
     if (delta >= 1020 && delta <= 1520)        //1.125ms  ---0
@@ -237,59 +225,50 @@ static int nec_dec(void)
     else if (delta >= 1800 && delta <= 2350)   //2.25ms   ---1
         code = IR_VAL_ONE;
     else if (delta >= 10400 && delta <= 13600) //13.5ms   ---Leader Header
-    {
         code = IR_VAL_START;
-    }
     else
         return -1;
 
-    if ( code == 2 )
-    {
-        len = s_next-1;
+    if (code == 2) {
+        len = s_next - 1;
 
-        if ( len == 1 )
+        if (len == 1)
             data = s_data[0];
-        else if ( len == 2 )
-            data =(s_data[0] << 8 | s_data[1]);
-        else if ( len == 3 )
-            data = ((s_data[2] << 16) | (s_data[1] << 8)| s_data[0] );
-        else if ( len == 4 )
-            data = ((s_data[3] << 24) |(s_data[2] << 16) | (s_data[1] << 8)| s_data[0] );
-        if ( len > 0 )
-        {
+        else if (len == 2)
+            data = (s_data[0] << 8 | s_data[1]);
+        else if (len == 3)
+            data = ((s_data[2] << 16) | (s_data[1] << 8) | s_data[0]);
+        else if (len == 4)
+            data = ((s_data[3] << 24) | (s_data[2] << 16) | (s_data[1] << 8) | s_data[0]);
+        if (len > 0) {
             s_next = 0;
             printk("data=0x%.8x len=%d\n", data, len);
             return data;
-        }
-        else
-        s_next = 1;
+        } else
+            s_next = 1;
     }
 
-    if (s_next == 0)
-    {
+    if (s_next == 0) {
         if (code != IR_VAL_START)
             return -1;
 
         s_next = 1;
         s_bits = 0;
-    }
-    else if (s_next == 1)
-        s_next = pushbit(s_data+0, code);
-    else if (s_next == 2)   
-        s_next = pushbit(s_data+1, code);
+    } else if (s_next == 1)
+        s_next = pushbit(s_data + 0, code);
+    else if (s_next == 2)
+        s_next = pushbit(s_data + 1, code);
     else if (s_next == 3)
-        s_next = pushbit(s_data+2, code);
-    else if (s_next == 4)
-    {
-        s_next = pushbit(s_data+3, code);
-        if (s_next == 5)
-        {
+        s_next = pushbit(s_data + 2, code);
+    else if (s_next == 4) {
+        s_next = pushbit(s_data + 3, code);
+        if (s_next == 5) {
             s_next = 0;
-			data = ((s_data[3] << 24) |(s_data[2] << 16) | (s_data[1] << 8)| s_data[0] );
+            data = ((s_data[3] << 24) | (s_data[2] << 16) | (s_data[1] << 8) | s_data[0]);
             return data;
         }
     }
-    
+
     return -1;
 }
 
@@ -300,24 +279,21 @@ static irqreturn_t ir_keypad_irq(int irq, void *dev_id)
     unsigned int status;
     static int code;
     unsigned short key;
-    
-    status = REG_RD(PIO_BASE_VA + PIO_INT_STA ) ;
-    if ( status & (1<<gpio_key.irq_num))
-    {
+
+    status = REG_RD(PIO_BASE_VA + PIO_INT_STA) ;
+    if (status & (1 << gpio_key.irq_num)) {
         code = nec_dec();
-        if ( code != -1 )
-        {   
+        if (code != -1) {
             key = rawcode_to_keycode(code);
-            printk("code=%x, key=%d(%s)\n", code, key , rawcode_to_str(code) );
-            if ( key != -1 )
-            {
+            printk("code=%x, key=%d(%s)\n", code, key , rawcode_to_str(code));
+            if (key != -1) {
                 input_report_key(keypad->input_dev, key, 1);
                 input_report_key(keypad->input_dev, key, 0);
                 input_sync(keypad->input_dev);
             }
         }
     }
-    REG_WR(status & (1<<gpio_key.irq_num), PIO_BASE_VA + PIO_INT_STA);
+    REG_WR(status & (1 << gpio_key.irq_num), PIO_BASE_VA + PIO_INT_STA);
     return IRQ_HANDLED;
 }
 
@@ -328,26 +304,24 @@ static int __devinit ir_keypad_probe(struct platform_device *pdev)
     int error;
     int i;
     u32 irq_ctl;
-    
+
     input_dev = input_allocate_device();
     if (!keypad || !input_dev) {
         error = -ENOMEM;
         goto err_free_mem;
     }
 
-    if(gpio_key.port == PORT_H){
+    if (gpio_key.port == PORT_H) {
         irq_ctl =   REG_RD(PIO_BASE_VA + PIO_INT_CTL);
         REG_WR((1 << gpio_key.port_num) | irq_ctl, PIO_BASE_VA + PIO_INT_CTL);
         gpio_key.irq_num = gpio_key.port_num;
-    } 
-    else
-    {
+    } else {
         irq_ctl =   REG_RD(PIO_BASE_VA + PIO_INT_CTL);
         REG_WR((1 << (gpio_key.port_num + 12)) | irq_ctl, PIO_BASE_VA + PIO_INT_CTL);
         gpio_key.irq_num = gpio_key.port_num + 12;
     }
     pio_int_cfg(gpio_key.irq_num, EDGE_RISING);
-    pio_fun_cfg(gpio_key.port, gpio_key.port_num);  
+    pio_fun_cfg(gpio_key.port, gpio_key.port_num);
     pio_pull_cfg(gpio_key.port, gpio_key.port_num, PULL_UP);
     keypad->input_dev = input_dev;
 
@@ -358,11 +332,10 @@ static int __devinit ir_keypad_probe(struct platform_device *pdev)
 
     keypad->irq_mask = 0;
     input_dev->evbit[0] = BIT_MASK(EV_KEY);
-    for (i=0; i< sizeof(keys)/sizeof(keys[0]); i++)
-    {
+    for (i = 0; i < sizeof(keys) / sizeof(keys[0]); i++) {
         set_bit(keys[i], input_dev->keybit);
     }
-    
+
     keypad->irq = PIO_IRQ;
 
     error = request_irq(keypad->irq, ir_keypad_irq, IRQF_TRIGGER_RISING | IRQF_SHARED, dev_name(&pdev->dev), keypad);
@@ -370,16 +343,16 @@ static int __devinit ir_keypad_probe(struct platform_device *pdev)
         DEBUG_MSG("failed to register keypad interrupt\n");
         goto err_free_mem;
     }
-    
+
     error = input_register_device(keypad->input_dev);
     if (error)
         goto err_free_irq;
 
     platform_set_drvdata(pdev, keypad);
     keypad->pdev = pdev;
-    
+
     DEBUG_MSG("%s done, irq %d, P%c%.2d, EINT%.2d\n", __FUNCTION__, keypad->irq,
-        gpio_key.port + 'A' -1, gpio_key.port_num, gpio_key.irq_num);
+              gpio_key.port + 'A' - 1, gpio_key.port_num, gpio_key.irq_num);
     return 0;
 
 err_free_irq:
@@ -396,7 +369,7 @@ static int __devexit ir_keypad_remove(struct platform_device *pdev)
     struct ir_keypad *keypad = platform_get_drvdata(pdev);
 
     DEBUG_MSG("%s\n", __FUNCTION__);
-    
+
     platform_set_drvdata(pdev, NULL);
 
     input_unregister_device(keypad->input_dev);
@@ -419,7 +392,7 @@ static struct platform_device ir_keypad_device = {
     .num_resources = 0,
     .dev = {
         .release = ir_keypad_dev_release,
-    }   
+    }
 };
 
 static struct platform_driver ir_keypad_driver = {
@@ -432,11 +405,11 @@ static struct platform_driver ir_keypad_driver = {
 };
 
 static int __init ir_keypad_init(void)
-{    
+{
     DEBUG_MSG("%s\n", __FUNCTION__);
-    if ( init_ir_pin(&gpio_key.port, &gpio_key.port_num))
+    if (init_ir_pin(&gpio_key.port, &gpio_key.port_num))
         return -EINVAL;
-    
+
     platform_device_register(&ir_keypad_device);
     return platform_driver_register(&ir_keypad_driver);
 }
@@ -453,4 +426,3 @@ module_exit(ir_keypad_exit);
 
 MODULE_AUTHOR("liaods <dongsheng.liao@gmail.com>");
 MODULE_LICENSE("GPL");
-

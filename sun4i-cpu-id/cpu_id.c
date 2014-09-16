@@ -24,41 +24,39 @@
 extern enum sw_ic_ver sw_get_ic_ver(void);
 
 static int cpuid_show(char *page, char **start, off_t off,
-                          int count, int *eof, void *data)
+                      int count, int *eof, void *data)
 {
     unsigned char buf[128];
     void *addr;
     char ver;
     *eof = 1;
-    if( off > 0 )       
+    if (off > 0)
         return 0;
 
     addr = ioremap_nocache(ID_REG_BASE, 128);
-    if ( addr == NULL )
-    {
+    if (addr == NULL) {
         printk("remap failed!\n");
         return -ENOMEM;
     }
 
     memset((void *)&buf, 0, sizeof(buf));
 
-    switch( sw_get_ic_ver() )
-    {
+    switch (sw_get_ic_ver()) {
     case MAGIC_VER_A:
-        ver='A';
+        ver = 'A';
         break;
     case MAGIC_VER_B:
-        ver='B';
+        ver = 'B';
         break;
     case MAGIC_VER_C:
-        ver='C';
+        ver = 'C';
         break;
     default:
-        ver='?';
+        ver = '?';
         break;
     }
     sprintf(buf, "VER:%c\nID:%.8x%.8x%.8x%.8x\n",
-        ver, readl(addr), readl(addr+4), readl(addr+8), readl(addr+12));
+            ver, readl(addr), readl(addr + 4), readl(addr + 8), readl(addr + 12));
     iounmap(addr);
     return sprintf(page, "%s", buf);
 }
@@ -79,4 +77,3 @@ module_init(cpuid_init);
 module_exit(cpuid_exit);
 
 MODULE_LICENSE("GPL");
-

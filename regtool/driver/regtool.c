@@ -1,4 +1,4 @@
-/* 
+/*
 ** regtool.c, regtool driver, used to read/write memory/registers from user mode
 ** Copyright (C) 2013 liaods < dongsheng.liao@gmail.com >
 **
@@ -33,7 +33,7 @@
 typedef enum {
     CMD_REGCTL_BYTE = 0,
     CMD_REGCTL_WORD = 1,
-    CMD_REGCTL_DWORD = 2,   
+    CMD_REGCTL_DWORD = 2,
 } regtool_type_t;
 
 typedef struct {
@@ -42,8 +42,8 @@ typedef struct {
     regtool_type_t type;
 } regtool_data_t;
 
-static long regtool_ioctl(struct file *file, 
-    unsigned int cmd, unsigned long arg)
+static long regtool_ioctl(struct file *file,
+                          unsigned int cmd, unsigned long arg)
 {
     void __user *argp = (void __user *)arg;
     regtool_data_t data;
@@ -51,58 +51,46 @@ static long regtool_ioctl(struct file *file,
 
     memset((void *)&data, 0, sizeof(data));
 
-    if( copy_from_user((void *)&data, argp, sizeof(data)) )
+    if ( copy_from_user((void *)&data, argp, sizeof(data)) )
         return -EFAULT;
 
-    if( data.addr >= REGTOOL_MAX_ADDR )
+    if ( data.addr >= REGTOOL_MAX_ADDR )
         return -EINVAL;
 
     virt = ioremap_nocache(data.addr, REGTOOL_SIZE);
-    if ( virt == NULL )
-    {
+    if ( virt == NULL ) {
         printk("remap failed!\n");
         return -ENOMEM;
     }
 
-    switch( cmd )
-    {
-        case REGTOOL_GET:
-            if( data.type == CMD_REGCTL_BYTE )
-            {
-                data.value = readb(virt);
-            }
-            else if( data.type == CMD_REGCTL_WORD )
-            {
-                data.value = readw(virt);
-            }           
-            else if( data.type == CMD_REGCTL_DWORD )
-            {
-                data.value = readl(virt);
-            }
-            iounmap(virt);
-            if( copy_to_user(argp, (void *)&data, sizeof(data)))
-                return -EFAULT;
-            break;
+    switch ( cmd ) {
+    case REGTOOL_GET:
+        if ( data.type == CMD_REGCTL_BYTE ) {
+            data.value = readb(virt);
+        } else if ( data.type == CMD_REGCTL_WORD ) {
+            data.value = readw(virt);
+        } else if ( data.type == CMD_REGCTL_DWORD ) {
+            data.value = readl(virt);
+        }
+        iounmap(virt);
+        if ( copy_to_user(argp, (void *)&data, sizeof(data)))
+            return -EFAULT;
+        break;
 
-        case REGTOOL_SET:
-            if( data.type == CMD_REGCTL_BYTE )
-            {
-                writeb((u8)data.value, (unsigned char *)virt);
-            }
-            else if( data.type == CMD_REGCTL_WORD )
-            {
-                writew((u16)data.value, (unsigned short *)virt);
-            }           
-            else if( data.type == CMD_REGCTL_DWORD )
-            {
-                writel((u32)data.value, (unsigned long *)virt);
-            }
-            iounmap(virt);
-            break;
-            
-        default:
-            iounmap(virt);
-            return -EINVAL;
+    case REGTOOL_SET:
+        if ( data.type == CMD_REGCTL_BYTE ) {
+            writeb((u8)data.value, (unsigned char *)virt);
+        } else if ( data.type == CMD_REGCTL_WORD ) {
+            writew((u16)data.value, (unsigned short *)virt);
+        } else if ( data.type == CMD_REGCTL_DWORD ) {
+            writel((u32)data.value, (unsigned long *)virt);
+        }
+        iounmap(virt);
+        break;
+
+    default:
+        iounmap(virt);
+        return -EINVAL;
     }
     return 0;
 }
@@ -142,4 +130,3 @@ module_exit(regtool_exit);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("liaods");
-

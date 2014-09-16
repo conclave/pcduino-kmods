@@ -21,11 +21,12 @@
 #ifndef _REMOTE_H__
 #define _REMOTE_H__
 
-/* 
+/*
 * TODO: need to change the following values for your remote controller
 */
 #define MAX_KEYS 20
-static unsigned long raw_codes[MAX_KEYS] = {
+static unsigned long raw_codes[MAX_KEYS] =
+{
     0xba45ff00,             0xb847ff00,
     0xbb44ff00, 0xbf40ff00, 0xbc43ff00,
     0xf807ff00, 0xea15ff00, 0xf609ff00,
@@ -35,7 +36,8 @@ static unsigned long raw_codes[MAX_KEYS] = {
     0xbd42ff00, 0xad52ff00, 0xb54aff00,
 };
 
-static unsigned short keys[MAX_KEYS] = {
+static unsigned short keys[MAX_KEYS] =
+{
     KEY_POWER,  KEY_MENU,
     KEY_ESC,    KEY_KPPLUS,     KEY_BACK,
     KEY_PREVIOUS,   KEY_PLAY,   KEY_NEXT,
@@ -45,7 +47,8 @@ static unsigned short keys[MAX_KEYS] = {
     KEY_7,  KEY_8,  KEY_9,
 };
 
-static unsigned char key_str[MAX_KEYS][10] = {
+static unsigned char key_str[MAX_KEYS][10] =
+{
     "POWER",                "MENU",
     "TEST(ESC)", "PLUS",    "BACK",
     "PREVIOUS", "PLAY",     "NEXT",
